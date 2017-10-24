@@ -11,17 +11,19 @@ parser.add_argument("flank", help = "number of nucleotides to flank introns by",
 parser.add_argument("--stranded", action = 'store_true', default = False, required = False)
 args = parser.parse_args()
 
-print( "Intron bed file is %s" % args.intronBed)
-print( "Cluster bed file is %s" % args.clusterBed)
-print( "output file is %s" % args.outFile)
-print( "flank is %s" % args.flank)
-print("stranded is %s" % args.stranded )
+print( "A: %s" % args.intronBed)
+print( "B: %s" % args.clusterBed)
+print( "output: %s" % args.outFile)
+print( "flank: %s" % args.flank)
+print("stranded: %s" % args.stranded )
 
-#introns = BedTool("/Users/Jack/SAN/IoN_RNAseq/F210I_M323K_paper/RNA_Maps/data//M323K_adult_brain_se_intron_included.bed")
-#clusters = BedTool("/Users/Jack/SAN/IoN_RNAseq/F210I_M323K_paper/RNA_Maps/data/iCLIP/F210I_WT_rep23_lowFDR_clusters_strand.bed")
-# outFile="/Users/Jack/Documents/Misc/intron_coverage.csv"
-#flank = 100
 
+
+# introns = BedTool("test/gencode_mouse_polyAs.bed")
+# clusters = BedTool("test/FUS_iCLIP.bed")
+# # outFile="RNAmaps_coverage_tmp"
+# flank = 500
+# stranded = True
 
 outFile = args.outFile
 flank = int(args.flank)
@@ -29,8 +31,15 @@ introns = BedTool(args.intronBed)
 clusters = BedTool(args.clusterBed)
 stranded = args.stranded
 
+# calculate lengths of each file
+nA = len(introns)
+nB = len(clusters)
 
-# first flank the introns by 100nt either side
+print( "nA: %s" % nA )
+print( "nB: %s" % nB )
+
+
+# first flank the introns by $flank either side
 
 def flank_introns(feature):
 	feature.start = feature.start - int(flank)

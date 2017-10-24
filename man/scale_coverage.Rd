@@ -2,7 +2,7 @@
 % Please edit documentation in R/formatCoverage.R
 \name{scale_coverage}
 \alias{scale_coverage}
-\title{Title}
+\title{Perform scaling operation on a single vector}
 \usage{
 scale_coverage(cov, left, right, centre, centre_length)
 }
@@ -10,5 +10,5 @@ scale_coverage(cov, left, right, centre, centre_length)
 \item{centre_length}{}
 }
 \description{
-Title
+Perform scaling operation on a single vector
 }

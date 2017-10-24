@@ -2,14 +2,14 @@
 % Please edit documentation in R/formatCoverage.R
 \name{formatCoverage}
 \alias{formatCoverage}
-\title{Title}
+\title{Create scaled and smoothed vector for plotting}
 \usage{
-formatCoverage(coverage, smoothing, left = 0, centre = NULL, right = 0,
-  centre_length = 1000)
+formatCoverage(coverage, smoothing = 30, left = 0, centre = NULL,
+  right = 0, centre_length = 1000)
 }
 \arguments{
 \item{centre_length}{}
 }
 \description{
-Title
+Create scaled and smoothed vector for plotting
 }
