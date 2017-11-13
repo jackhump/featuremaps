@@ -4,7 +4,7 @@
 \alias{createCoverage}
 \title{Create coverage object}
 \usage{
-createCoverage(A, B, A_flank, stranded)
+createCoverage(A, B, A_flank, stranded, outFile = NA)
 }
 \arguments{
 \item{stranded}{}

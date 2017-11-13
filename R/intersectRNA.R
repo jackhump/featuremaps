@@ -6,10 +6,15 @@
 #' @param stranded
 #'
 #' @return
-#' @export FALSE
+#' @export
 #'
 #' @examples
-createCoverage <- function(A, B, A_flank, stranded){
+createCoverage <- function(A,
+                           B,
+                           A_flank,
+                           stranded,
+                           outFile=NA
+                           ){
 
   path <- paste(system.file(package="RNAmaps"), "intersectRNA.py", sep="/")
 
@@ -20,8 +25,12 @@ createCoverage <- function(A, B, A_flank, stranded){
   }
   command <- "python"
   # create temporary file
-  outFile <- "RNAmaps_coverage_tmp"
-
+  if( is.na(outFile)){
+    # generate random temp file name
+    outFile <-"RNAmaps_coverage_tmp"
+  }else{
+    outFile <- outFile
+  }
   args <- c(A,B,outFile,A_flank, strandFlag)
 
   allArgs <- c(path, args)
@@ -52,6 +61,7 @@ intersectRNA <- function(A, B, A_flank=0, stranded=TRUE){
   #coverage_file <- "RNAmaps_coverage_tmp"
   coverage_object <- createCoverage(A, B, A_flank, stranded)
   coverage_raw <- readLines(coverage_object$outFile)
+
   # data is CSV - split
   coverage_raw <- sapply(coverage_raw, FUN = function(x) stringr::str_split(x, ","))
   # separate coordinate ids from binary coverage vector
@@ -62,6 +72,11 @@ intersectRNA <- function(A, B, A_flank=0, stranded=TRUE){
   coverage$metadata <- stringr::str_split_fixed( coverage_object$metadata, ":", 2)[,2]
   coverage$metadata <- stringr::str_trim(coverage$metadata, side = "left")
   names(coverage$metadata) <- stringr::str_split_fixed( coverage_object$metadata, ":", 2)[,1]
+  # convert to list
+  coverage$metadata <- as.list(coverage$metadata)
+  coverage$metadata$nA <- as.numeric(coverage$metadata$nA)
+  coverage$metadata$nB <- as.numeric(coverage$metadata$nB)
+  coverage$metadata$flank <- as.numeric(coverage$metadata$flank)
 
   # for each coverage line the first element is the coordinate of the A interval
   coverage$coords <- unlist(lapply(coverage_raw, FUN = function(x)

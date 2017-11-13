@@ -78,6 +78,7 @@ output_list = []
 for feature in intervals:
 	strand = intervals[feature][0]
 	length = intervals[feature][1]
+	# create vector of all 0
 	vector = [0] * length
 	for cluster in intervals[feature][2:]:
 		if cluster[0] < 0: # deal with clusters that overlap the edges
@@ -86,6 +87,7 @@ for feature in intervals:
 			cluster[1] = length
 		cluster_length = cluster[1] - cluster[0]
 		vector[ cluster[0]:cluster[1] ] = [1] * int(cluster_length)
+		# account for strand
 	if strand == "-":
 		vector.reverse()
 	vector.insert(0, str(feature))
