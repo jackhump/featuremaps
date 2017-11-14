@@ -16,5 +16,9 @@ Imports:
     dplyr,
     stringr,
     smoother,
-    reshape2
+    reshape2,
+    IRanges,
+    GenomicRanges,
+    S4Vectors,
+    GenomeInfoDb
 RoxygenNote: 6.0.1

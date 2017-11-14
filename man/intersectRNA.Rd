@@ -2,13 +2,13 @@
 % Please edit documentation in R/intersectRNA.R
 \name{intersectRNA}
 \alias{intersectRNA}
-\title{Use pybedtools to intersect two bedfiles and output numerical vectors}
+\title{Intersect two bed files - using GenomicRanges in R}
 \usage{
-intersectRNA(A, B, A_flank = 0, stranded = TRUE)
+intersectRNA(A, B, stranded = TRUE, A_flank = NA, B_flank = NA)
 }
 \arguments{
-\item{stranded}{}
+\item{B_flank}{}
 }
 \description{
-Use pybedtools to intersect two bedfiles and output numerical vectors
+Intersect two bed files - using GenomicRanges in R
 }

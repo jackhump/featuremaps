@@ -3,6 +3,7 @@
 export(createCoverage)
 export(formatCoverage)
 export(intersectRNA)
+export(intersectRNA_python)
 export(plotRNAmap)
 export(scaleCoverage)
 export(scale_exon)
