@@ -17,9 +17,10 @@ plotRNAmap <- function(coverage, fill, alpha,
   # extract objects from list
   scaled <- coverage$scaled
   metadata <- coverage$metadata
-  print(metadata )
+  print(metadata)
   # density plot
   p <- ggplot() + theme_classic() # make this customisable?
+
   p <- p + ggplot2::geom_area( aes(1:length(scaled), scaled ), colour = NA, fill = fill, alpha = alpha)
 
   # PROPORTION
@@ -39,8 +40,8 @@ plotRNAmap <- function(coverage, fill, alpha,
       bar_fill <- fill
     }
     p <- p +
-      geom_bar( aes( x = centre_point, y = my_ymax * 0.75 ), stat = "identity" , fill = bar_fill, alpha = bar_alpha, width = bar_width) +
-      annotate( geom = "text", x = centre_point, y = my_ymax * 0.77, label = paste0( signif(coverage$overlap * 100, digits = 3), "%" ) )
+      #geom_bar( aes( x = centre_point, y = my_ymax * 0.90 ), stat = "identity" , fill = bar_fill, alpha = bar_alpha, width = bar_width) +
+      annotate( geom = "text", x = centre_point, y = my_ymax * 0.10, label = paste0( signif(coverage$overlap * 100, digits = 3), "%" ), colour = fill )
   }
 
   # AXES
@@ -53,59 +54,60 @@ plotRNAmap <- function(coverage, fill, alpha,
   total_length <- 1 + metadata$left_seg + metadata$centre_seg + metadata$right_seg
 
   # special case when the segment lengths equal the flank on both sides
-  if( metadata$flank == metadata$left_seg & metadata$flank == metadata$right_seg){
+  if( metadata$A_flank == metadata$left_seg & metadata$A_flank == metadata$right_seg){
     x_breaks <- c(
       1,
-      metadata$flank,
-      metadata$flank + metadata$centre_seg,
-      metadata$flank + metadata$centre_seg + metadata$flank
+      metadata$A_flank,
+      metadata$A_flank + metadata$centre_seg,
+      metadata$A_flank + metadata$centre_seg + metadata$A_flank
     )
     x_labels <- c(
-      -metadata$flank,
+      -metadata$A_flank,
       0,
       0,
-      paste("+", metadata$flank)
+      paste("+", metadata$A_flank)
     )
   }
 
   # flank is smaller than both segments (symmetric)
-  if( metadata$flank < metadata$left_seg & metadata$flank < metadata$right_seg){
+  if( metadata$A_flank < metadata$left_seg & metadata$A_flank < metadata$right_seg){
     x_breaks <- c(
       1,
-      1 + metadata$flank,
+      1 + metadata$A_flank,
       1 + metadata$left_seg,
       1 + metadata$left_seg + metadata$centre_seg,
-      1 + metadata$left_seg + metadata$centre_seg + metadata$right_seg - metadata$flank,
+      1 + metadata$left_seg + metadata$centre_seg + metadata$right_seg - metadata$A_flank,
       metadata$left_seg + metadata$centre_seg + metadata$right_seg
      )
     x_labels <- c(
-      paste0("-", metadata$flank),
+      paste0("-", metadata$A_flank),
       "5\'",
-      paste0("+", metadata$left_seg - metadata$flank),
-      paste0("-", metadata$left_seg - metadata$flank),
+      paste0("+", metadata$left_seg - metadata$A_flank),
+      paste0("-", metadata$left_seg - metadata$A_flank),
       "3\'",
-      paste0("+", metadata$flank)
+      paste0("+", metadata$A_flank)
     )
     total_length <- metadata$left_seg + metadata$centre_seg + metadata$right_seg
   }
+
   # flank is larger than both segments (symmetric)
-  if( metadata$flank > metadata$left_seg & metadata$flank > metadata$right_seg){
+  if( metadata$A_flank > metadata$left_seg & metadata$A_flank > metadata$right_seg){
     # TODO
     x_breaks <- c(
       1,
       1 + metadata$left_seg,
-      1 + metadata$flank,
-      1 + metadata$flank + metadata$centre_seg,
-      1 + metadata$flank + metadata$centre_seg + metadata$flank - metadata$right_seg,
-      metadata$flank + metadata$centre_seg + metadata$flank
+      1 + metadata$A_flank,
+      1 + metadata$A_flank + metadata$centre_seg,
+      1 + metadata$A_flank + metadata$centre_seg + metadata$A_flank - metadata$right_seg,
+      metadata$A_flank + metadata$centre_seg + metadata$A_flank
     )
     x_labels <- c(
-      paste0("-", metadata$flank),
+      paste0("-", metadata$A_flank),
       0,
-      paste0("+", metadata$left_seg - metadata$flank),
-      paste0("-", metadata$left_seg - metadata$flank),
+      paste0("+", metadata$left_seg - metadata$A_flank),
+      paste0("-", metadata$left_seg - metadata$A_flank),
       0,
-      paste0("+", metadata$flank)
+      paste0("+", metadata$A_flank)
     )
   }
 
@@ -134,4 +136,16 @@ plotRNAmap <- function(coverage, fill, alpha,
 
 
   return(p)
+}
+
+addCoverageTrack <- function(coverage2, fill, alpha=0.5,
+                              bar_width = NA,
+                              bar_fill = NA,
+                              bar_alpha = NA){
+  density <- ggplot2::geom_area(
+    aes(1:length(coverage2$scaled), coverage2$scaled ),
+    colour = NA, fill = fill, alpha = alpha
+    )
+
+  return(density)
 }

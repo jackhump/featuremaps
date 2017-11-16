@@ -93,6 +93,53 @@ intersectRNA_python <- function(A, B, A_flank=0, stranded=TRUE){
 }
 
 
+#' Create vector of length A with locations of B
+#'
+#' @param i
+#'
+#' @return
+#'
+#' @examples
+fillVector <- function(i, ALIST, BLIST){
+
+  a_range <- ALIST[i] # time consuming!
+  a_start <- GenomicRanges::start(a_range)
+  a_width <- GenomicRanges::width(a_range)
+
+
+  strand <- as.character( GenomicRanges::strand( a_range ) )
+  # create zero vector - this is time consuming for large vectors
+  vector <- rep.int(0, times = a_width )
+
+  b_range <- GenomicRanges::ranges(BLIST[[i]]) # time consuming!
+  b_start <- GenomicRanges::start(b_range)
+  b_end <- GenomicRanges::end(b_range)
+  # subtract b coordinates by a to get relative coordinates
+  # + 1 to account for 0-base/1-base fuckery
+  b_start <- b_start - a_start + 1
+  b_end <- b_end - a_start + 1
+
+  # walk through b_list and convert 0 to 1 at those coordinates
+  # create list of start and end relative coordinates
+  coords_in_b <- unlist(purrr::map2( b_start, b_end, seq) )
+
+  # remove any that overhang
+  overhangs <- which( coords_in_b > a_width | coords_in_b <  0  )
+  if( length(overhangs) > 0){
+    coords_in_b <- coords_in_b[ -overhangs ]
+  }
+  # set all elements within those ranges to 1
+  vector[ coords_in_b ] <- 1
+  # flip vector if on negative strand
+
+  if( strand == "-"){
+    vector <- rev.default(vector)
+  }
+
+  #message(i)
+  return(vector)
+}
+
 
 #' Intersect two bed files - using GenomicRanges in R
 #'
@@ -106,7 +153,14 @@ intersectRNA_python <- function(A, B, A_flank=0, stranded=TRUE){
 #' @export
 #'
 #' @examples
-intersectRNA <- function(A,B, stranded = TRUE, A_flank = NA, B_flank = NA){
+intersectRNA <- function(
+  A,
+  B,
+  stranded = TRUE,
+  A_flank = 0,
+  B_flank = 0,
+  remove.duplicates.A = FALSE,
+  remove.duplicates.B = FALSE){
 
   if(stranded){
     ignoreStrand <- FALSE
@@ -118,16 +172,25 @@ intersectRNA <- function(A,B, stranded = TRUE, A_flank = NA, B_flank = NA){
   a <- rtracklayer::import.bed(A)
   b <- rtracklayer::import.bed(B)
 
+  # get together metadata
+  metadata <- list(
+    A = A,
+    B = B,
+    A_flank = A_flank,
+    B_flank = B_flank,
+    stranded = stranded,
+    nA = length(a),
+    nB = length(b)
+  )
+
   # if flank requested then flank datasets
   # assume equal flank at each end
-  if( !is.na(A_flank)){
+  # adjust for 0-based (bed) going to 1-based (genomicRanges)
     GenomicRanges::start(a) <-  GenomicRanges::start(a) - A_flank
     GenomicRanges::end(a) <-  GenomicRanges::end(a) + A_flank
-  }
-  if( !is.na(B_flank)){
+
     GenomicRanges::start(b) <-  GenomicRanges::start(b) - B_flank
-    GenomicRanges::end(b) <-  GenomicRanges::end(b) - B_flank
-  }
+    GenomicRanges::end(b) <-  GenomicRanges::end(b) + B_flank
 
   # set seqlevels
   all_chrs <- intersect( seqlevels(a), seqlevels(b) )
@@ -135,8 +198,16 @@ intersectRNA <- function(A,B, stranded = TRUE, A_flank = NA, B_flank = NA){
   GenomeInfoDb::seqlevels(b, force = TRUE) <- all_chrs
 
   # remove duplicates from a
-  a <- IRanges::reduce(a)
-
+  if( remove.duplicates.A ){
+    a <- IRanges::reduce(a, min.gapwidth = 0)
+    metadata$duplicates.A <- metadata$nA - length(a)
+    metadata$nA <- length(a)
+  }
+  if( remove.duplicates.B ){
+    b <- IRanges::reduce(b, min.gapwidth = 0)
+    metadata$duplicates.B <- metadata$nB - length(b)
+    metadata$nB <- length(b)
+  }
   # perform intersect
   intersect <- GenomicRanges::findOverlaps(a,b, ignore.strand = ignoreStrand)
 
@@ -145,55 +216,43 @@ intersectRNA <- function(A,B, stranded = TRUE, A_flank = NA, B_flank = NA){
 
   # create list where each element is a
   # genomic ranges object of the elements in B that overlap one entry in A
-  b_in_a <- GenomicRanges::intersect(a,b, ignore.strand = ignoreStrand)
+  #b_in_a <- GenomicRanges::intersect(a,b, ignore.strand = ignoreStrand)
+  # get out all ranges in B that are hits in A
+  # and split by which A they belong to
+  #TODO - more efficient way of doing this
+  b_in_a <- b[ S4Vectors::subjectHits(intersect) ]
   # convert to list - this is very time consuming!
   b_list <- split(b_in_a, S4Vectors::queryHits(intersect) )
 
   # for each element in a_list
-  fillVector <- function(i){
-
-    a_range <- a_list[i] # time consuming!
-    a_start <- GenomicRanges::start(a_range)
-    a_width <- GenomicRanges::width(a_range)
-
-
-    strand <- as.character( GenomicRanges::strand( a_range ) )
-    # create zero vector - this is time consuming for large vectors
-    vector <- rep.int(0, times = a_width )
-
-    b_range <- GenomicRanges::ranges(b_list[[i]]) # time consuming!
-    b_start <- GenomicRanges::start(b_range)
-    b_end <- GenomicRanges::end(b_range)
-    # subtract b coordinates by a to get relative coordinates
-    b_start <- b_start - a_start
-    b_end <- b_end - a_start
-
-    # walk through b_list and convert 0 to 1 at those coordinates
-    # create list of start and end relative coordinates
-    coords_in_b <- unlist(purrr::map2( b_start, b_end, seq) )
-
-    # remove any that overhang
-    overhangs <- which( coords_in_b > a_width | coords_in_b <  0  )
-    if( length(overhangs) > 0){
-      coords_in_b <- coords_in_b[ -overhangs ]
-    }
-    # set all elements within those ranges to 1
-    vector[ coords_in_b ] <- 1
-    # flip vector if on negative strand
-
-    if( strand == "-"){
-      vector <- rev.default(vector)
-    }
-
-    #message(i)
-    return(vector)
-  }
   #library(microbenchmark)
   #microbenchmark(fillVector(200), times =50)
 
-  vectors <- purrr::map( seq_along(a_list), ~fillVector(.) )
+  #library(microbenchmark)
+  # super slow but using purr::map2 instead of accessing each element with [[]]
+  # is roughly same speed for large lists
+  #a_list <- split(a_list, seq_along(a_list))
+  #a_list <- as.list(a_list)
+  #b_list <- as.list(b_list)
+  # coercing GRanges and GRangesList to lists is very slow
+  # maybe faster to split GRange (a) to a GRangesList
+  #a_list <- split(a_list, seq_along(a_list))
+  # then use their own Map function
+  #microbenchmark(
+  #vectors <- purrr::map2( a_list, b_list, fillVector_map2 )
+  #microbenchmark(as.list(a_list), times = 10)
+  #vectors <- Map( fillVector_map2, a_list, b_list)
+  #, times = 100)
+  # microbenchmark(
+  vectors <- purrr::map( 1:length(a_list), ~fillVector(., ALIST = a_list, BLIST = b_list) )
+  # ,times = 20)
 
-  return(vectors)
+  coverage <- list(
+    cov = vectors,
+    metadata = metadata
+  )
+
+  return(coverage)
 }
 
 

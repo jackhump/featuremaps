@@ -4,7 +4,8 @@
 \alias{intersectRNA}
 \title{Intersect two bed files - using GenomicRanges in R}
 \usage{
-intersectRNA(A, B, stranded = TRUE, A_flank = NA, B_flank = NA)
+intersectRNA(A, B, stranded = TRUE, A_flank = 0, B_flank = 0,
+  remove.duplicates.A = FALSE, remove.duplicates.B = FALSE)
 }
 \arguments{
 \item{B_flank}{}
