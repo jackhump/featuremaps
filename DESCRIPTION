@@ -1,8 +1,8 @@
-Package: RNAmaps
+Package: featuremaps
 Title: Visualise Intersections of Genomic Intervals
 Version: 0.0.0.9000
 Authors@R: person("Jack", "Humphrey", email = "jack.humphrey@ucl.ac.uk", role = c("aut", "cre"))
-Description: Using a system call to bedtools, RNAmaps intersects two sets of genomic coordinates where one set set encompasses the other.
+Description: Using a system call to bedtools, featuremaps intersects two sets of genomic coordinates where one set set encompasses the other.
     Each interval can then be scaled to a uniform length and the proportional coverage is calculated.
     Pretty density plots can then be made.
 Depends: R (>= 3.3.2),

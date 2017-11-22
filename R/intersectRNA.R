@@ -167,7 +167,7 @@ intersectRNA <- function(
   }else{
     ignoreStrand <- TRUE
   }
-
+  message("reading in files")
   # read in bed files to genomic ranges
   a <- rtracklayer::import.bed(A)
   b <- rtracklayer::import.bed(B)
@@ -193,7 +193,8 @@ intersectRNA <- function(
     GenomicRanges::end(b) <-  GenomicRanges::end(b) + B_flank
 
   # set seqlevels
-  all_chrs <- intersect( seqlevels(a), seqlevels(b) )
+  all_chrs <- intersect( GenomeInfoDb::seqlevels(a),
+                         GenomeInfoDb::seqlevels(b) )
   GenomeInfoDb::seqlevels(a, force = TRUE) <- all_chrs
   GenomeInfoDb::seqlevels(b, force = TRUE) <- all_chrs
 
@@ -244,6 +245,9 @@ intersectRNA <- function(
   #vectors <- Map( fillVector_map2, a_list, b_list)
   #, times = 100)
   # microbenchmark(
+
+  message("creating vectors")
+
   vectors <- purrr::map( 1:length(a_list), ~fillVector(., ALIST = a_list, BLIST = b_list) )
   # ,times = 20)
 
