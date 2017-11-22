@@ -1,4 +1,4 @@
-# RNAmaps
+# featuremaps
 An R package for creating sophisticated plots of genomic interval intersections.
 
 ## Dependencies
@@ -16,12 +16,12 @@ Install the package from GitHub using the devtools package.
 
 ```
 library(devtools)
-devtools::install_github("jackhump/RNAmaps")
+devtools::install_github("jackhump/featuremaps")
 ```
 
-# Creating beautiful intersection plots with *RNAmaps*
+# Creating beautiful intersection plots with *featuremaps*
 
-RNAmaps allows you to visualise the intersection of two sets of genomic intervals where one set of intervals (parent or *A*) overlaps the other (child or *B*). 
+featuremaps allows you to visualise the intersection of two sets of genomic intervals where one set of intervals (parent or *A*) overlaps the other (child or *B*). 
 
 Examples of parent intervals include:
 * introns
@@ -35,11 +35,11 @@ Examples of child intervals include:
 * Transposable elements
 * locations of sequence motifs
 
-RNAmaps first performs an intersection of the two sets of genomic intervals (stored as BED files) and records the position of each element in B that overlaps each element in A. As A intervals can vary in length, the intersected intervals are then scaled to a uniform size in a scheme set by the user which allows for unscaled sections. The relative density of at position is then calculated ( sum of the number of overlapping B features at a given position / total number of A features) to create a vector of densities.
+featuremaps first performs an intersection of the two sets of genomic intervals (stored as BED files) and records the position of each element in B that overlaps each element in A. As A intervals can vary in length, the intersected intervals are then scaled to a uniform size in a scheme set by the user which allows for unscaled sections. The relative density of at position is then calculated ( sum of the number of overlapping B features at a given position / total number of A features) to create a vector of densities.
 
 ## Worked example
 
-In the /test directory there are two BED files, XX.bed and YY.bed. We can use RNAmaps to test for overlap and localisation of features in YY within each interval in XX
+In the /test directory there are two BED files, XX.bed and YY.bed. We can use featuremaps to test for overlap and localisation of features in YY within each interval in XX
 
 1. Reading in files and intersecting the two
 ``` 
@@ -59,11 +59,11 @@ The scaled density vector for the intersection of A and B is stored in intersect
 plot(intersect$scaled)
 ```
 
-RNAmaps was created with the ggplot2 plotting system in mind and so provides a interface to create good-looking plots.
-The RNAmaps() function takes the list of arguments given to formatRNA() and creates x and y axes. The scaled coverage vector can then be plotted as an area or a line. 
+featuremaps was created with the ggplot2 plotting system in mind and so provides a interface to create good-looking plots.
+The featuremaps() function takes the list of arguments given to formatRNA() and creates x and y axes. The scaled coverage vector can then be plotted as an area or a line. 
 
 ```
-RNAmaps( data = intersect, plotType = "area", fill = "blue", alpha = 0.5 )
+featuremaps( data = intersect, plotType = "area", fill = "blue", alpha = 0.5 )
 ```
 
 
@@ -80,7 +80,7 @@ myscheme <- plotScheme( centre = "scaled", left = 0, right = 0, centre_length = 
 intersect1 <- intersectRNA(A = XX.bed, B = YY.bed) %>% formatRNA(scheme=myscheme)
 intersect2 <- intersectRNA(A = ZZ.bed, B = YY.bed) %>% formatRNA(scheme=myscheme)
 
-multiplot <- RNAmaps(scheme=myscheme) + 
+multiplot <- featuremaps(scheme=myscheme) + 
   geom_area( makeCov(intersect1, scheme = myscheme), aes(x,y), fill = "blue", alpha = 0.5 ) +
   geom_area( makeCov(intersect2, scheme = myscheme), aes(x,y), fill = "red", alpha = 0.5 )
 ```
