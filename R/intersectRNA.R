@@ -198,8 +198,8 @@ intersectRNA <- function(
   # force argument deprecated
   #GenomeInfoDb::seqlevels(a, force = TRUE) <- all_chrs
   #GenomeInfoDb::seqlevels(b, force = TRUE) <- all_chrs
-  GenomeInfoDb::seqlevels(a) <- all_chrs
-  GenomeInfoDb::seqlevels(b) <- all_chrs	
+  GenomeInfoDb::seqlevels(a,pruning.mode="coarse") <- all_chrs
+  GenomeInfoDb::seqlevels(b,pruning.mode="coarse") <- all_chrs	
 
   # remove duplicates from a
   if( remove.duplicates.A ){
